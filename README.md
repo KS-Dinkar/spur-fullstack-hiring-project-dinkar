@@ -1,122 +1,92 @@
-Spur Fullstack Hiring Project - Chat Agent
+**🤖 Spur Fullstack Chat Agent**
 
-This is a full-stack e-commerce support chat application built with React (Frontend), Express/TypeScript (Backend), and SQLite (Database). It utilizes Google's Gemini 2.5 Flash to provide automated customer support.
+A high-performance, full-stack e-commerce support application. This project leverages \*\*Google Gemini 2.5 Flash\*\* to provide instant, automated customer service through a sleek, persistent chat interface.
 
-🚀 Getting Started Locally
+**🚀 Key Features**
 
-Follow these steps to get the project running on your machine.
+- **Real-time AI Interaction:** Low-latency responses using the gemini-2.5-flash model.
+- **Session Persistence:** Intelligent chat state management using sessionStorage paired with unique DB identifiers.
+- **Service-Oriented Architecture (SOA):** A clean, decoupled backend built for scalability.
+- **Dark-Mode UI:** A modern, accessible interface featuring fluid CSS transitions and pill-shaped input fields.
 
-Prerequisites
+**🛠️ Tech Stack**
 
-Node.js (v18 or higher recommended)
+**Frontend**
 
-npm or yarn
+- **Framework:** React.js
+- **Styling:** CSS3 (Custom Variables & Transitions)
+- **Icons:** Lucide-React
 
-A Google Gemini API Key (Get one at Google AI Studio)
+**Backend**
 
-1. Backend Setup
+- **Runtime:** Node.js (TypeScript)
+- **Server:** Express.js
+- **AI Integration:** Google Generative AI SDK
 
-Navigate to the backend directory:
+**Database**
+
+- **Engine:** SQLite
+- **Driver:** better-sqlite3 (High-performance, synchronous API)
+
+**⚙️ Getting Started**
+
+**1\. Backend Setup**
+
+\# Navigate to the directory
 
 cd SpurBackend
 
-
-Install dependencies:
+\# Install dependencies
 
 npm install
 
+\# Configure environment
 
-Create a .env file in the SpurBackend root:
+cat &lt;<EOF &gt; .env
 
-PORT=3000
+PORT=4000
+
 GENAI_API_KEY=your_gemini_api_key_here
 
+EOF
 
-Start the development server:
+\# Start development server
 
 npm run dev
 
+**2\. Frontend Setup**
 
-Note: The server will automatically initialize the SQLite database (data.db) and create the necessary tables on the first run.
-
-2. Frontend Setup
-
-Navigate to the frontend directory:
+\# Navigate to the directory
 
 cd SpurFrontend
 
-
-Install dependencies:
+\# Install dependencies
 
 npm install
 
+\# Configure API endpoint
 
-Create a .env file in the SpurFrontend root:
+echo "REACT_APP_API_BASE_URL=<http://localhost:4000>" > .env
 
-REACT_APP_API_BASE_URL=http://localhost:3000
-
-
-Start the React app:
+\# Start the application
 
 npm start
 
+**🏗️ Architecture Detail**
 
-🗄️ Database Management
+The system is designed with a strict **separation of concerns** to facilitate easier testing and future migrations:
 
-The project uses SQLite with the better-sqlite3 driver for high performance and zero-config setup.
+- **Routes Layer (/routes)**: Handles HTTP endpoints and input validation.
+- **Service Layer (/services)**: Orchestrates business logic, AI prompt construction, and data flow.
+- **Data Access Layer (/db)**: Manages raw SQL execution and the SQLite connection.
 
-Initialization: The schema is defined in src/db/sqlite.ts. It runs automatically when the backend starts.
+**🛡️ Reliability Features**
 
-Migrations: Since it's a lightweight project, schema updates are handled via CREATE TABLE IF NOT EXISTS checks.
+- **Atomic Transactions:** Message storage is wrapped in DB transactions to prevent desync between user input and AI output.
+- **Persona Guardrails:** System instructions enforce business hours (9 AM - 5 PM) and specific refund policies.
 
-Structure:
+**🔮 Future Roadmap**
 
-conversations: Stores sessionId to persist chat history across refreshes.
-
-messages: Stores individual chat bubbles (user or ai) linked to a conversation.
-
-🏗️ Architecture Overview
-
-The backend follows a Service-Oriented Architecture (SOA) pattern to separate concerns:
-
-Routes Layer (src/routes): Defines HTTP endpoints and handles basic request validation (e.g., ensuring sessionId exists).
-
-Service Layer (src/services): Contains the core business logic. It coordinates between the LLM provider and the database.
-
-Data Access Layer (src/db): Manages the SQLite connection and raw SQL execution.
-
-Key Design Decisions
-
-Session Persistence: Used sessionStorage on the frontend combined with a unique sessionId to ensure users don't lose their chat history when navigating or refreshing, without requiring a full login system.
-
-Atomic Transactions: Message insertion is wrapped in a db.transaction() to ensure that either both the user message and AI response are saved, or neither is, preventing "half-saved" states.
-
-Modern UI: Used a dark-mode centered CSS design with pill-shaped inputs and CSS transitions for a "premium" chat feel.
-
-🤖 LLM Implementation
-
-Provider
-
-Model: gemini-2.5-flash
-
-Why? It offers a high context window and extremely low latency, making the "Agent is typing..." state feel brief and responsive.
-
-Prompting Strategy
-
-The agent is configured using a System Instruction to maintain a specific persona:
-
-Tone: Helpful, clear, and concise.
-
-Constraints: Operates 9 AM - 5 PM, Monday to Friday.
-
-Policies: Explicit instructions on 30-day refunds for electronics and clothing items.
-
-🛠️ Trade-offs & Future Improvements ("If I had more time...")
-
-Context Memory: Currently, each query is sent individually. I would implement a "sliding window" of the last 5-10 messages from the DB to send back to Gemini so the agent remembers the context of the conversation.
-
-WebSockets: Switching from REST polling/requests to Socket.io would allow for real-time streaming of AI responses (word-by-word) instead of waiting for the full block.
-
-Unit Testing: Adding Vitest for backend services and React Testing Library for the message bubbles.
-
-Error Handling: Implementing more robust UI feedback for network timeouts or API rate limits.
+- \[ \] **Streaming Responses:** Use WebSockets (Socket.io) for real-time, token-by-token text generation.
+- \[ \] **Automated Testing:** Integration of Vitest for logic and React Testing Library for UI components.
+- \[ \] **Advanced Error Recovery:** Implementation of exponential backoff for API rate-limiting.
