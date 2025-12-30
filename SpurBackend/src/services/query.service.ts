@@ -9,9 +9,13 @@ export async function handleQuery(
   sessionId: string,
   query: string
 ): Promise<{ sessionId: string; response: string }> {
+  const conversationHistory = getRecentHistory(sessionId, 5);
+  const historyString = conversationHistory
+  .map(msg => `${msg.sender.toUpperCase()}: ${msg.text}`)
+  .join('\n---\n');
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
-    contents: query,
+    contents: `Previous Conversation:\n${historyString}\n\nUser Query: ${query}`,
     config: {
       systemInstruction: `You are a helpful support agent for a small e‑commerce store. Answer clearly and concisely
                           Your support hours are from 9 AM to 5 PM, Monday to Friday.
@@ -78,7 +82,6 @@ export async function getAllMessages(sessionId: string) {
   const getConversationId = db.prepare(`
     SELECT id FROM conversations WHERE sessionId = ?
   `);
-
   const conversation = getConversationId.get(sessionId) as { id: number };
   const conversationId = conversation.id;
 
@@ -87,4 +90,21 @@ export async function getAllMessages(sessionId: string) {
   `).all(conversationId);
 
   return messages;
+}
+
+function getRecentHistory(sessionId: string, limit: number = 10) {
+  const conversation = db.prepare('SELECT id FROM conversations WHERE sessionId = ?').get(sessionId) as { id: number } | undefined;
+  
+  if (!conversation) return [];
+
+  const messages = db.prepare(`
+    SELECT sender, text FROM (
+      SELECT sender, text, id FROM messages 
+      WHERE conversationId = ? 
+      ORDER BY id DESC LIMIT ?
+    ) ORDER BY id ASC
+  `).all(conversation.id, limit) as { sender: string, text: string }[];
+
+  return messages
+
 }
